@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 from cartopy.feature import ShapelyFeature
 import cartopy.crs as ccrs
 import matplotlib.patches as mpatches
+from shapely.geometry import Point, Polygon
 import matplotlib.lines as mlines
 
 # make the plotting interactive
@@ -35,8 +36,8 @@ def scale_bar(ax, location=(0.92, 0.95)):
 
 # load data from file
 outline = gpd.read_file('data_files/NI_outline.shp')
-lgd = gpd.read_file('data_files/LGD.shp')
-crime_data = gpd.read_file('data_files/NI_crimes.shp')
+lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
+crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
 
 # create a figure of size 10x10
 myFig = plt.figure(figsize=(10, 10))
@@ -63,7 +64,7 @@ lgd_colors = ['palegreen', 'cyan', 'violet', 'pink', 'teal', 'yellow', 'red', 'o
 lgd_names = list(lgd.LGDNAME.unique())
 lgd_names.sort()
 
-# Add the LGD outlines to the map using the selected colors
+# Add the LGD outlines to the map using cartopy's ShapelyFeature using the selected colors
 for ii, name in enumerate(lgd_names):
     feat = ShapelyFeature(lgd.loc[lgd['LGDNAME'] == name, 'geometry'],
                           myCRS,
@@ -72,6 +73,9 @@ for ii, name in enumerate(lgd_names):
                           linewidth=1,
                           alpha=0.25)
     ax.add_feature(feat)
+
+#Add point data to map
+crimes_handle = ax.plot(crimes.geometry.x, crimes.geometry.y, 'o', color='black', ms=4, transform=myCRS)
 
 
 myFig.savefig('map.png', bbox_inches='tight', dpi=300)
