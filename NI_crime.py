@@ -41,6 +41,9 @@ outline = gpd.read_file('data_files/NI_outline.shp')
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
 
+# Summarize crime data using Geopandas and print to screen
+print(crimes.groupby(['Crime_type'])['Crime_type'].count())
+
 # Create a figure of size 10x10 inches
 myFig = plt.figure(figsize=(10, 10))
 
@@ -78,7 +81,7 @@ for ii, name in enumerate(lgd_names):
                           alpha=0.25)
     ax.add_feature(feat)
 
-#Add point data og NI crimes to the map
+# Add point data of NI crimes to the map
 crimes_handle = ax.plot(crimes.geometry.x, crimes.geometry.y, 'o', color='black', ms=4, transform=myCRS)
 
 # Generate a list of handles for the LGD dataset
