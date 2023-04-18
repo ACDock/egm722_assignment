@@ -9,6 +9,30 @@ import matplotlib.patches as mpatches
 from shapely.geometry import Point, Polygon
 import matplotlib.lines as mlines
 
+# Load data from the files
+# and reproject LGD and NI crime data into same coordinate system as NI outline
+outline = gpd.read_file('data_files/NI_outline.shp')
+lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
+crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
+
+# Summarize NI Crime data by crime type using Geopandas and print output to screen
+crimes_total = crimes['Crime_type'].count()
+print(crimes.groupby(['Crime_type'])['Crime_type'].count())
+
+# Create spatial join between lgd and crime gdf's
+# to enable the data to be analysed spatially
+join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
+
+# Summarize NI Crime data by crime type in each LGD, set Pandas to show all lines of output
+# and print output to screen
+join_summary = join['Crime_type'].count()
+pd.set_option('display.max_rows', None)
+print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
+
+# Check the total number of crimes in both gdf's and print output to screen
+print('Total number of crimes from original file: {}'.format(crimes_total))
+print('Total number of crimes from spatial join: {}'.format(join_summary))
+
 # Enable the matplotlib interactive mode
 # to update plots after every plotting command
 plt.ion()
@@ -35,31 +59,7 @@ def scale_bar(ax, location=(0.92, 0.95)):
     ax.text(sbx-12500, sby-4500, '10 km', transform=ax.projection, fontsize=8)
     ax.text(sbx-24500, sby-4500, '0 km', transform=ax.projection, fontsize=8)
 
-# Load data from the files
-# and reproject LGD and NI crime data into same coordinate system as NI outline
-outline = gpd.read_file('data_files/NI_outline.shp')
-lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
-crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
-
-# Summarize crime data by crime type using Geopandas and print to screen
-crimes_total = crimes['Crime_type'].count()
-print(crimes.groupby(['Crime_type'])['Crime_type'].count())
-
-# Create spatial join between LGD and NI Crimes data files
-# to enable the data to be analysed spatially
-join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
-
-# Summarize crime data by crime type in each LGD, set Pandas to show all lines of output
-# and print to screen
-join_summary = join['Crime_type'].count()
-pd.set_option('display.max_rows', None)
-print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
-
-# Check that the total number of crimes is the same in both gdf's
-print('Total number of crimes from original file: {}'.format(crimes_total))
-print('Total number of crimes from spatial join: {}'.format(join_summary))
-
-# Create a figure of size 10x10 inches
+# Create a figure of size 10x10 inches representing the page size in inches
 myFig = plt.figure(figsize=(10, 10))
 
 # Create a UTM reference system to transform the data
