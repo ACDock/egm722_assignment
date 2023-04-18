@@ -10,7 +10,7 @@ from shapely.geometry import Point, Polygon
 import matplotlib.lines as mlines
 
 # Enable the matplotlib interactive mode
-# To update plots after every plotting command
+# to update plots after every plotting command
 plt.ion()
 
 # Generate matplotlib handles to create a legend of the features put into the map
@@ -36,13 +36,28 @@ def scale_bar(ax, location=(0.92, 0.95)):
     ax.text(sbx-24500, sby-4500, '0 km', transform=ax.projection, fontsize=8)
 
 # Load data from the files
-# And reproject LGD and NI crime data into same coordinate system as NI outline
+# and reproject LGD and NI crime data into same coordinate system as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
 
-# Summarize crime data using Geopandas and print to screen
+# Summarize crime data by crime type using Geopandas and print to screen
+crimes_total = crimes['Crime_type'].count()
 print(crimes.groupby(['Crime_type'])['Crime_type'].count())
+
+# Create spatial join between LGD and NI Crimes data files
+# to enable the data to be analysed spatially
+join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
+
+# Summarize crime data by crime type in each LGD, set Pandas to show all lines of output
+# and print to screen
+join_summary = join['Crime_type'].count()
+pd.set_option('display.max_rows', None)
+print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
+
+# Check that the total number of crimes is the same in both gdf's
+print('Total number of crimes from original file: {}'.format(crimes_total))
+print('Total number of crimes from spatial join: {}'.format(join_summary))
 
 # Create a figure of size 10x10 inches
 myFig = plt.figure(figsize=(10, 10))
@@ -51,7 +66,7 @@ myFig = plt.figure(figsize=(10, 10))
 myCRS = ccrs.UTM(29)
 
 # Create an axes object in the figure, using the UTM projection
-# Where the data will be plotted
+# where the data will be plotted
 ax = plt.axes(projection=myCRS)
 
 # Add the outline of Northern Ireland using cartopy's ShapelyFeature
@@ -60,7 +75,7 @@ xmin, ymin, xmax, ymax = outline.total_bounds
 ax.add_feature(outline_feature)
 
 # Zoom the map to the area of interest using the boundary of the shapefile features
-# With a buffer of 5km around each edge
+# with a buffer of 5km around each edge
 ax.set_extent([xmin-5000, xmax+5000, ymin-5000, ymax+5000], crs=myCRS)
 
 # Pick colors for the individual LDG boundary polygons
@@ -71,7 +86,7 @@ lgd_names = list(lgd.LGDNAME.unique())
 lgd_names.sort()
 
 # Add the LGD outlines to the map using cartopy's ShapelyFeature
-# Using the selected colors
+# using the selected colors
 for ii, name in enumerate(lgd_names):
     feat = ShapelyFeature(lgd.loc[lgd['LGDNAME'] == name, 'geometry'],
                           myCRS,
@@ -96,8 +111,8 @@ leg = ax.legend(handles, labels, title='Legend', title_fontsize=10,
                  fontsize=6, loc='upper left', frameon=True, framealpha=1)
 
 # Add gridlines to the map
-# With longitude and latitude lines at 0.5 deg intervals
-# With no labels on left or bottom of map
+# with longitude and latitude lines at 0.5 deg intervals
+# and no labels on left or bottom of map
 gridlines = ax.gridlines(draw_labels=True,
                          xlocs=[-8, -7.5, -7, -6.5, -6, -5.5],
                          ylocs=[54, 54.5, 55, 55.5])
