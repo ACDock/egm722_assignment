@@ -9,22 +9,25 @@ import matplotlib.patches as mpatches
 from shapely.geometry import Point, Polygon
 import matplotlib.lines as mlines
 
-# Load data from the files
-# and reproject LGD and NI crime data into same coordinate system as NI outline
+# Load data from the files and reproject LGD and NI crime data into same coordinate system as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
+
+# Check that all data in gdf's are in same crs and print result to screen
+print(outline.crs == lgd.crs)
+print(outline.crs == crimes.crs)
+print(lgd.crs == crimes.crs)
 
 # Summarize NI Crime data by crime type using Geopandas and print output to screen
 crimes_total = crimes['Crime_type'].count()
 print(crimes.groupby(['Crime_type'])['Crime_type'].count())
 
-# Create spatial join between lgd and crime gdf's
-# to enable the data to be analysed spatially
+# Create spatial join between lgd and crime gdf's to enable the data to be analysed spatially
 join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
 
-# Summarize NI Crime data by crime type in each LGD, set Pandas to show all lines of output
-# and print output to screen
+# Summarize NI Crime data totals by crime type in each LGD,
+# Set Pandas to show all lines of output and print output to screen
 join_summary = join['Crime_type'].count()
 pd.set_option('display.max_rows', None)
 print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
@@ -33,8 +36,7 @@ print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
 print('Total number of crimes from original file: {}'.format(crimes_total))
 print('Total number of crimes from spatial join: {}'.format(join_summary))
 
-# Enable the matplotlib interactive mode
-# to update plots after every plotting command
+# Enable the matplotlib interactive mode to update plots after every plotting command
 plt.ion()
 
 # Generate matplotlib handles to create a legend of the features put into the map
@@ -65,9 +67,11 @@ myFig = plt.figure(figsize=(10, 10))
 # Create a UTM reference system to transform the data
 myCRS = ccrs.UTM(29)
 
-# Create an axes object in the figure, using the UTM projection
-# where the data will be plotted
+# Create an axes object in the figure, using the UTM projection where the data will be plotted
 ax = plt.axes(projection=myCRS)
+
+# Add title to the map
+ax.set_title('Crime incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=14, fontweight='bold')
 
 # Add the outline of Northern Ireland using cartopy's ShapelyFeature
 outline_feature = ShapelyFeature(outline['geometry'], myCRS, edgecolor='black', facecolor='white')
@@ -85,8 +89,7 @@ lgd_colors = ['palegreen', 'cyan', 'violet', 'pink', 'teal', 'yellow', 'red', 'o
 lgd_names = list(lgd.LGDNAME.unique())
 lgd_names.sort()
 
-# Add the LGD outlines to the map using cartopy's ShapelyFeature
-# using the selected colors
+# Add the LGD outlines to the map using cartopy's ShapelyFeature using the selected colors
 for ii, name in enumerate(lgd_names):
     feat = ShapelyFeature(lgd.loc[lgd['LGDNAME'] == name, 'geometry'],
                           myCRS,
@@ -110,8 +113,7 @@ labels = lgd_names + ['Crimes']
 leg = ax.legend(handles, labels, title='Legend', title_fontsize=10,
                  fontsize=6, loc='upper left', frameon=True, framealpha=1)
 
-# Add gridlines to the map
-# with longitude and latitude lines at 0.5 deg intervals
+# Add gridlines to the map with longitude and latitude lines at 0.5 deg intervals
 # and no labels on left or bottom of map
 gridlines = ax.gridlines(draw_labels=True,
                          xlocs=[-8, -7.5, -7, -6.5, -6, -5.5],
