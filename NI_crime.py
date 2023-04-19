@@ -9,15 +9,19 @@ import matplotlib.patches as mpatches
 from shapely.geometry import Point, Polygon
 import matplotlib.lines as mlines
 
-# Load data from the files and reproject LGD and NI crime data into same coordinate system as NI outline
+# Load data from the files and reproject LGD, NI crimes, and Towns data
+# into same coordinate system as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
+
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
+towns = gpd.read_file('data_files/Towns.shp').to_crs(epsg=32629)
 
 # Check that all data in gdf's are in same crs and print result to screen
+print(outline.crs)
 print(outline.crs == lgd.crs)
 print(outline.crs == crimes.crs)
-print(lgd.crs == crimes.crs)
+print(outline.crs == towns.crs)
 
 # Summarize NI Crime data by crime type using Geopandas and print output to screen
 crimes_total = crimes['Crime_type'].count()
