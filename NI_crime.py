@@ -1,18 +1,13 @@
 # Import the required modules
-import os
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
 from cartopy.feature import ShapelyFeature
 import cartopy.crs as ccrs
 import matplotlib.patches as mpatches
-from shapely.geometry import Point, Polygon
-import matplotlib.lines as mlines
 
-# Load data from the files and reproject LGD, NI crimes, and Towns data
-# into same coordinate system as NI outline
+# Load data from the files and reproject LGD, NI crimes, and Towns data into same coordinate system as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
-
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
 towns = gpd.read_file('data_files/Towns.shp').to_crs(epsg=32629)
@@ -23,15 +18,15 @@ print(outline.crs == lgd.crs)
 print(outline.crs == crimes.crs)
 print(outline.crs == towns.crs)
 
-# Summarize NI Crime data by crime type using Geopandas and print output to screen
+# Summarize all NI Crime data by crime type using Geopandas and print output to screen
 crimes_total = crimes['Crime_type'].count()
 print(crimes.groupby(['Crime_type'])['Crime_type'].count())
 
 # Create spatial join between lgd and crime gdf's to enable the data to be analysed spatially
 join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
 
-# Summarize NI Crime data totals by crime type in each LGD,
-# Set Pandas to show all lines of output and print output to screen
+# Summarize NI Crime data totals by crime type in each LGD, set Pandas to show all lines of output and
+# print output to screen
 join_summary = join['Crime_type'].count()
 pd.set_option('display.max_rows', None)
 print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
@@ -103,15 +98,24 @@ for ii, name in enumerate(lgd_names):
                           alpha=0.25)
     ax.add_feature(feat)
 
-# Add point data of NI crimes to the map
+# Add point data of NI crimes, towns, and cities to the map
 crimes_handle = ax.plot(crimes.geometry.x, crimes.geometry.y, 'o', color='black', ms=4, transform=myCRS)
+town_handle = ax.plot(towns.loc[towns['STATUS'] == 'Town'].geometry.x, towns.loc[towns['STATUS'] == 'Town'].geometry.y,
+                      's', color='orange', ms=5, transform=myCRS)
+city_handle = ax.plot(towns.loc[towns['STATUS'] == 'City'].geometry.x, towns.loc[towns['STATUS'] == 'City'].geometry.y,
+                      'o', color='r', ms=8, transform=myCRS)
+#crimetype_handle = ax.plot(crimes.loc[crimes['Crime_type'] == 'Anti-social behaviour'].geometry.x,
+#                            crimes.loc[crimes['Crime_type'] == 'Anti-social behaviour'].geometry.y, 'o', color='k',
+#                            ms=4, transform=myCRS)
 
 # Generate a list of handles for the LGD dataset
-lgd_handles = generate_handles(lgd.LGDNAME.unique(), lgd_colors, alpha=0.25)
+lgd_handle = generate_handles(lgd.LGDNAME.unique(), lgd_colors, alpha=0.25)
 
 # Make a list of handles and labels corresponding to the objects required in legend
-handles = lgd_handles + crimes_handle
-labels = lgd_names + ['Crimes']
+handles = lgd_handle + crimes_handle + town_handle + city_handle
+labels = lgd_names + ['Crimes', 'Towns', 'Cities']
+#handles = lgd_handle + crimetype_handle + town_handle + city_handle
+#labels = lgd_names + ['Anti-social behaviour', 'Towns', 'Cities']
 
 # Add legend to map in upper left corner
 leg = ax.legend(handles, labels, title='Legend', title_fontsize=10,
@@ -122,8 +126,13 @@ leg = ax.legend(handles, labels, title='Legend', title_fontsize=10,
 gridlines = ax.gridlines(draw_labels=True,
                          xlocs=[-8, -7.5, -7, -6.5, -6, -5.5],
                          ylocs=[54, 54.5, 55, 55.5])
-gridlines.left_labels = False # turn off the left-side labels
-gridlines.bottom_labels = False # turn off the bottom labels
+gridlines.left_labels = False
+gridlines.bottom_labels = False
+
+# Add the text labels for the towns and cities
+for ind, row in towns.iterrows():
+        x, y = row.geometry.x, row.geometry.y
+        ax.text(x, y, row['TOWN_NAME'].title(), color='b', fontsize=10, fontweight='bold', transform=myCRS)
 
 # Add the scale bar to the map
 scale_bar(ax)
