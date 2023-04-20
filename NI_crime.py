@@ -111,11 +111,11 @@ for ii, name in enumerate(lgd_names):
     ax.add_feature(feat)
 
 # Add point data of NI crimes, towns, and cities to the map
-crimes_handle = ax.plot(crimes.geometry.x, crimes.geometry.y, 'o', color='black', ms=4, transform=myCRS)
+crimes_handle = ax.plot(crimes.geometry.x, crimes.geometry.y, 'o', color='black', ms=3, transform=myCRS)
 town_handle = ax.plot(towns.loc[towns['STATUS'] == 'Town'].geometry.x, towns.loc[towns['STATUS'] == 'Town'].geometry.y,
-                      's', color='orange', ms=5, transform=myCRS)
+                      's', color='orange', ms=4, transform=myCRS)
 city_handle = ax.plot(towns.loc[towns['STATUS'] == 'City'].geometry.x, towns.loc[towns['STATUS'] == 'City'].geometry.y,
-                      'o', color='r', ms=8, transform=myCRS)
+                      'o', color='r', ms=6, transform=myCRS)
 #crimetype_handle = ax.plot(crimes.loc[crimes['Crime_type'] == 'Anti-social behaviour'].geometry.x,
 #                            crimes.loc[crimes['Crime_type'] == 'Anti-social behaviour'].geometry.y, 'o', color='k',
 #                            ms=4, transform=myCRS)
@@ -144,7 +144,7 @@ gridlines.bottom_labels = False
 # Add the text labels for the towns and cities
 for ind, row in towns.iterrows():
         x, y = row.geometry.x, row.geometry.y
-        ax.text(x, y, row['TOWN_NAME'].title(), color='b', fontsize=10, fontweight='bold', transform=myCRS)
+        ax.text(x, y, row['TOWN_NAME'].title(), color='blue', fontsize=10, fontweight='bold', transform=myCRS)
 
 # Add the scale bar to the map
 scale_bar(ax)
