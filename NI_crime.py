@@ -1,4 +1,4 @@
-# Import the required modules
+# Import modules
 import pandas as pd
 import geopandas as gpd
 import matplotlib.pyplot as plt
@@ -6,48 +6,58 @@ from cartopy.feature import ShapelyFeature
 import cartopy.crs as ccrs
 import matplotlib.patches as mpatches
 
-# Load data from the files and reproject LGD, NI crimes, and Towns data into same coordinate system as NI outline
+# Load data from files
+# Reproject data files into same coordinate system as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
 towns = gpd.read_file('data_files/Towns.shp').to_crs(epsg=32629)
 
-# Check that all data in gdf's are in same crs and print result to screen
-print(outline.crs)
-print(outline.crs == lgd.crs)
-print(outline.crs == crimes.crs)
-print(outline.crs == towns.crs)
+# Check all data in gdf's are in same crs
+# returns True or False
+print(outline.crs == lgd.crs == crimes.crs == towns.crs)
 
-# Summarize all NI Crime data by crime type using Geopandas and print output to screen
+# Summarize all NI Crime data by crime type totals
+# print to screen in descending order
 crimes_total = crimes['Crime_type'].count()
-print(crimes.groupby(['Crime_type'])['Crime_type'].count())
+print(crimes.groupby(['Crime_type'])['Crime_type'].count().sort_values(ascending=False))
 
-# Create spatial join between lgd and crime gdf's to enable the data to be analysed spatially
+# Create spatial join between lgd and crime gdf's
 join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
 
-# Summarize NI Crime data totals by crime type in each LGD, set Pandas to show all lines of output and
-# print output to screen
+# Summarize NI Crime data by crime type totals in each LGD
+# Set Pandas to show all lines of output
 join_summary = join['Crime_type'].count()
 pd.set_option('display.max_rows', None)
 print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
 
-# Check the total number of crimes in both gdf's and print output to screen
+# Check the total number of crimes in both gdf's
 print('Total number of crimes from original file: {}'.format(crimes_total))
 print('Total number of crimes from spatial join: {}'.format(join_summary))
 
-# Enable the matplotlib interactive mode to update plots after every plotting command
+# Enable the matplotlib interactive mode
 plt.ion()
 
-# Generate matplotlib handles to create a legend of the features put into the map
+# Generate matplotlib handles
 def generate_handles(labels, colors, edge='k', alpha=1):
+    """Generate handles for map legend using Matplotlib.
+
+     Creates a legend of the features put into the map by getting the length of the color list.
+     Uses a for loop to iterate over the labels list and assigns a rectangular color patch to each.
+     """
     lc = len(colors)
     handles = []
     for i in range(len(labels)):
         handles.append(mpatches.Rectangle((0, 0), 1, 1, facecolor=colors[i % lc], edgecolor=edge, alpha=alpha))
     return handles
 
-# Create a scale bar of length 20km in the upper right corner of the map
+# Create a scale bar for map
 def scale_bar(ax, location=(0.92, 0.95)):
+    """Generate a scale bar for map using Cartopy.
+
+    Creates a scale bar of length 20km in top right corner of map.
+    Scale bar divided by 10km and 20km labels with alternating black and white format.
+    """
     x0, x1, y0, y1 = ax.get_extent()
     sbx = x0 + (x1 - x0) * location[0]
     sby = y0 + (y1 - y0) * location[1]
@@ -66,7 +76,8 @@ myFig = plt.figure(figsize=(10, 10))
 # Create a UTM reference system to transform the data
 myCRS = ccrs.UTM(29)
 
-# Create an axes object in the figure, using the UTM projection where the data will be plotted
+# Create an axes object in the figure where the data will be plotted
+# using the UTM projection
 ax = plt.axes(projection=myCRS)
 
 # Add title to the map
@@ -88,7 +99,8 @@ lgd_colors = ['palegreen', 'cyan', 'violet', 'pink', 'teal', 'yellow', 'red', 'o
 lgd_names = list(lgd.LGDNAME.unique())
 lgd_names.sort()
 
-# Add the LGD outlines to the map using cartopy's ShapelyFeature using the selected colors
+# Add the LGD outlines to the map using cartopy's ShapelyFeature
+# using the selected colors
 for ii, name in enumerate(lgd_names):
     feat = ShapelyFeature(lgd.loc[lgd['LGDNAME'] == name, 'geometry'],
                           myCRS,
