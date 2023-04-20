@@ -6,15 +6,15 @@ from cartopy.feature import ShapelyFeature
 import cartopy.crs as ccrs
 import matplotlib.patches as mpatches
 
-# Load data from files
-# Reproject data files into same coordinate system as NI outline
+# Load data from files and
+# reproject data files into same crs as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
 towns = gpd.read_file('data_files/Towns.shp').to_crs(epsg=32629)
 
 # Check all data in gdf's are in same crs
-# returns True or False
+# returns True or False to screen
 print(outline.crs == lgd.crs == crimes.crs == towns.crs)
 
 # Summarize all NI Crime data by crime type totals
@@ -25,15 +25,15 @@ print(crimes.groupby(['Crime_type'])['Crime_type'].count().sort_values(ascending
 # Create spatial join between lgd and crime gdf's
 join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
 
-# Summarize NI Crime data by crime type totals in each LGD
-# Set Pandas to show all lines of output
-join_summary = join['Crime_type'].count()
+# Summarize NI Crime data by totals for crime types in each lgd
+# Set Pandas to show all lines of output and print to screen
+join_total = join['Crime_type'].count()
 pd.set_option('display.max_rows', None)
 print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
 
 # Check the total number of crimes in both gdf's
 print('Total number of crimes from original file: {}'.format(crimes_total))
-print('Total number of crimes from spatial join: {}'.format(join_summary))
+print('Total number of crimes from spatial join: {}'.format(join_total))
 
 # Enable the matplotlib interactive mode
 plt.ion()
