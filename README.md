@@ -22,6 +22,7 @@ Setting up the conda environment – Open Anaconda Navigator and click on the �
 Installing Pycharm – This is the recommended Python Integrated Development Environment (IDE) to use to run the code for this project. Download the Community Edition here – https://www.jetbrains.com/pycharm/download/
 
 RUNNING THE PROJECT CODE
+
 Launch Pycharm from Anaconda Navigator and click on the ‘Open’ button at the top right-hand corner of the screen. From here navigate to the folder where you cloned the repository and select the ‘NI_crime.py’ file. Ensure ‘Current File’ is selected from the drop-down menu at the top right-hand side of the screen and then click on the run icon. 
 
 The code will run, and the print outputs will be visible in the bottom panel on the screen. To see the output map plots, select ‘map.png’ from the file tree in the left-hand panel of the screen. 
