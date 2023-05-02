@@ -2,7 +2,9 @@
 EGM722 Project Assignment - This project will use python coding to investigate crime incidents in Northern Ireland
 
 SETUP / INSTALLATION
+
 GETTING STARTED
+
 To obtain and run the Python code for this project you will need to follow these instructions in the specified order: -
 
 Installing GitHub – This is where the repository containing the project files is located. Details of how to create a GitHub account can be found here https://github.com
