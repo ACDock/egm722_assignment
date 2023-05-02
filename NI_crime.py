@@ -9,36 +9,46 @@ import matplotlib.patches as mpatches
 # Load data from files and
 # reproject data files into same crs as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
-print(outline.crs)
+print() # Prints an empty line to separate the output and make it easier to read
+print('The CRS of the NI Outline file is: {}'. format(outline.crs))
+print()
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
 towns = gpd.read_file('data_files/Towns.shp').to_crs(epsg=32629)
 
 # Check all data in gdf's are in same crs
 # returns True or False to screen
-print(outline.crs == lgd.crs == crimes.crs == towns.crs)
+print('The data are all in the same CRS:{}'.format(outline.crs == lgd.crs == crimes.crs == towns.crs))
+print()
 
 # Summarize all NI Crime data by crime type totals
 # print to screen in descending order
-crimes_total = crimes['Crime_type'].count()
+print('Total number of incidents for each crime type:')
 print(crimes.groupby(['Crime_type'])['Crime_type'].count().sort_values(ascending=False))
+print()
 
 # Create spatial join between lgd and crime gdf's
 join = gpd.sjoin(lgd, crimes, how='inner', lsuffix='left', rsuffix='right')
 
 # Summarize NI Crime data by totals for crime types in each lgd
 # Set Pandas to show all lines of output and print to screen
-join_total = join['Crime_type'].count()
 pd.set_option('display.max_rows', None)
+print('Total number of incidents in each LGD:')
+print(join.groupby(['LGDNAME'])['Crime_type'].count().sort_values(ascending=False))
+print()
+print('Total number of incidents in each LGD by crime type')
 print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
+print()
 
 # Check the total number of crimes in both gdf's
-print('Total number of crimes from original file: {}'.format(crimes_total))
-print('Total number of crimes from spatial join: {}'.format(join_total))
+crimes_total = crimes['Crime_type'].count()
+join_total = join['Crime_type'].count()
+print('Total number of crime incidents from original file: {}'.format(crimes_total))
+print('Total number of crime incidents from spatial join: {}'.format(join_total))
 
 # Create a bar graph of total crime incidents by crime type
 graph = pd.DataFrame(join, columns=['Crime_type'])
-N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14 = len(graph[graph['Crime_type'] == 'Other crime']), \
+C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14 = len(graph[graph['Crime_type'] == 'Other crime']), \
     len(graph[graph['Crime_type'] == 'Violent crime']), len(graph[graph['Crime_type'] == 'Anti-social behaviour']), \
     len(graph[graph['Crime_type'] == 'Bicycle theft']), len(graph[graph['Crime_type'] == 'Burglary']), \
     len(graph[graph['Crime_type'] == 'Criminal damage and arson']), len(graph[graph['Crime_type'] == 'Drugs']), \
@@ -52,8 +62,8 @@ Colours = ['red', 'orange', 'yellow', 'green', 'blue', 'plum', 'gold', 'silver',
 
 plt.bar(['Other crime', 'Violent crime', 'Anti-social behaviour', 'Bicycle theft', 'Burglary',
          'Criminal damage and arson', 'Drugs', 'Other theft', 'Possession of weapons', 'Public order', 'Robbery',
-         'Shoplifting', 'Theft from the person', 'Vehicle crime'], [N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12,
-                                                                    N13, N14], width, color=Colours)
+         'Shoplifting', 'Theft from the person', 'Vehicle crime'], [C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12,
+                                                                    C13, C14], width, color=Colours)
 plt.title('Crime incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=10) # Update title if using other datasets
 plt.xlabel('Crime Type', fontsize=8)
 plt.ylabel('Number of Incidents', fontsize=8)
