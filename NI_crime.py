@@ -10,7 +10,7 @@ import matplotlib.patches as mpatches
 # reproject data files into same crs as NI outline
 outline = gpd.read_file('data_files/NI_outline.shp')
 print()  # Prints an empty line to separate the outputs and make them easier to read
-print('The CRS of the NI Outline file is: {}'. format(outline.crs))
+print('The CRS of the NI outline file is: {}'. format(outline.crs))
 print()
 lgd = gpd.read_file('data_files/LGD.shp').to_crs(epsg=32629)
 crimes = gpd.read_file('data_files/NI_crimes.shp').to_crs(epsg=32629)
@@ -56,21 +56,33 @@ C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13, C14 = len(graph[graph['C
     len(graph[graph['Crime_type'] == 'Public order']), len(graph[graph['Crime_type'] == 'Robbery']), \
     len(graph[graph['Crime_type'] == 'Shoplifting']), len(graph[graph['Crime_type'] == 'Theft from the person']), \
     len(graph[graph['Crime_type'] == 'Vehicle crime'])
+
+# Specify the width of the bars
 width = 0.5
+
+# Specify the colour of each bar
 Colours = ['red', 'orange', 'yellow', 'green', 'blue', 'plum', 'gold', 'silver', 'aqua', 'brown', 'wheat', 'cyan',
            'maroon', 'springgreen']
 
+# Plot the bars onto the chart
 plt.bar(['Other crime', 'Violent crime', 'Anti-social behaviour', 'Bicycle theft', 'Burglary',
          'Criminal damage and arson', 'Drugs', 'Other theft', 'Possession of weapons', 'Public order', 'Robbery',
          'Shoplifting', 'Theft from the person', 'Vehicle crime'], [C1, C2, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12,
                                                                     C13, C14], width, color=Colours)
-plt.title('Crime incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=10)
+
+# Add a title and axis labels to the chart
+plt.title('Crime Incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=10)
 plt.xlabel('Crime Type', fontsize=8)
 plt.ylabel('Number of Incidents', fontsize=8)
 plt.tick_params(labelsize=2)
+
+# Add gridlines to the chart
 plt.grid(True)
+
+# Save the bar chart
 plt.savefig('Bar Chart.png', bbox_inches='tight', dpi=300)
 
+# Plot the data onto a map
 # Enable the matplotlib interactive mode
 plt.ion()
 
@@ -137,8 +149,8 @@ myCRS = ccrs.UTM(29)
 ax = plt.axes(projection=myCRS)
 
 # Add title to the map
-# The text inside the quotation marks can be changed if mapping individual crime type
-ax.set_title('Crime incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=14, fontweight='bold')
+ax.set_title('Crime incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=14, fontweight='bold')  # Change title
+# if mapping individual crime types
 
 # Add the outline of Northern Ireland using cartopy's ShapelyFeature
 outline_feature = ShapelyFeature(outline['geometry'], myCRS, edgecolor='black', facecolor='white')
