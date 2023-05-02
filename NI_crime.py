@@ -36,12 +36,37 @@ print(join.groupby(['LGDNAME', 'Crime_type'])['Crime_type'].count())
 print('Total number of crimes from original file: {}'.format(crimes_total))
 print('Total number of crimes from spatial join: {}'.format(join_total))
 
+# Create a bar graph of total crime incidents by crime type
+graph = pd.DataFrame(join, columns=['Crime_type'])
+N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12, N13, N14 = len(graph[graph['Crime_type'] == 'Other crime']), \
+    len(graph[graph['Crime_type'] == 'Violent crime']), len(graph[graph['Crime_type'] == 'Anti-social behaviour']), \
+    len(graph[graph['Crime_type'] == 'Bicycle theft']), len(graph[graph['Crime_type'] == 'Burglary']), \
+    len(graph[graph['Crime_type'] == 'Criminal damage and arson']), len(graph[graph['Crime_type'] == 'Drugs']), \
+    len(graph[graph['Crime_type'] == 'Other theft']), len(graph[graph['Crime_type'] == 'Possession of weapons']), \
+    len(graph[graph['Crime_type'] == 'Public order']), len(graph[graph['Crime_type'] == 'Robbery']), \
+    len(graph[graph['Crime_type'] == 'Shoplifting']), len(graph[graph['Crime_type'] =='Theft from the person']), \
+    len(graph[graph['Crime_type'] == 'Vehicle crime'])
+width = 0.5
+Colours = ['red', 'orange', 'yellow', 'green', 'blue', 'plum', 'gold', 'silver', 'aqua', 'brown', 'wheat', 'cyan',
+           'maroon', 'springgreen']
+
+plt.bar(['Other crime', 'Violent crime', 'Anti-social behaviour', 'Bicycle theft', 'Burglary',
+         'Criminal damage and arson', 'Drugs', 'Other theft', 'Possession of weapons', 'Public order', 'Robbery',
+         'Shoplifting', 'Theft from the person', 'Vehicle crime'], [N1, N2, N3, N4, N5, N6, N7, N8, N9, N10, N11, N12,
+                                                                    N13, N14], width, color=Colours)
+plt.title('Crime incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=10) # Update title if using other datasets
+plt.xlabel('Crime Type', fontsize=8)
+plt.ylabel('Number of Incidents', fontsize=8)
+plt.tick_params(labelsize=2)
+plt.grid(True)
+plt.savefig('Bar Chart.png', bbox_inches='tight', dpi=300)
+
 # Enable the matplotlib interactive mode
 plt.ion()
 
 # Generate matplotlib handles
 def generate_handles(labels, colors, edge='k', alpha=1):
-    """Generate handles for map legend using Matplotlib.
+    """This function generates handles for the map legend using Matplotlib.
 
      Creates a legend of the features put into the map by getting the length of the color list.
      Uses a for loop to iterate over the labels list and assigns a rectangular color patch to each.
@@ -56,7 +81,7 @@ def generate_handles(labels, colors, edge='k', alpha=1):
 # adapted this question: https://stackoverflow.com/q/32333870
 # answered by SO user Siyh: https://stackoverflow.com/a/35705477
 def scale_bar(ax, location=(0.92, 0.95)):
-    """Generate a scale bar for map using Cartopy.
+    """This function generates a scale bar for the map using Cartopy.
 
     Creates a scale bar of length 20km in top right corner of map.
     Scale bar divided by 10km and 20km labels with alternating black and white format.
@@ -84,7 +109,7 @@ myCRS = ccrs.UTM(29)
 ax = plt.axes(projection=myCRS)
 
 # Add title to the map
-# The ext inside the quotation marks can be changed if alternative data used
+# The text inside the quotation marks can be changed if alternative data used
 ax.set_title('Crime incidents in Northern Ireland (Dec 17 - Nov 18)', fontsize=14, fontweight='bold')
 
 # Add the outline of Northern Ireland using cartopy's ShapelyFeature
@@ -154,4 +179,4 @@ for ind, row in towns.iterrows():
 scale_bar(ax)
 
 # Save the map
-myFig.savefig('map.png', bbox_inches='tight', dpi=300)
+myFig.savefig('Map.png', bbox_inches='tight', dpi=300)
